@@ -22,7 +22,7 @@ def auth_required(f):
             data = jwt.decode(
                 access_token, app.config["SECRET_KEY"], algorithms=["HS256"]
             )
-            current_user = User.get(name__exact=data["user_name"])
+            current_user = User.objects.get(name__exact=data["user_name"])
         except:
             return make_response(
                 jsonify({"message": "Invalid authorization token."}), 401
@@ -33,16 +33,16 @@ def auth_required(f):
     return decorater
 
 
-@app.route("/login", method=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     auth = request.get_json()
     if not auth or not auth.get("username") or not auth.get("password"):
         return make_response(jsonify({"message": "Invalid login credentials."}), 401)
 
     try:
-        user = User.get(name__exact=auth["username"])[0]
+        user = User.objects.get(name=auth["username"])
     except DoesNotExist:
-        return make_response(jsonify({"message": "Invalid username or password."}), 401)
+        return make_response(jsonify({"message": "User does not exits"}), 401)
 
     if check_password_hash(user.pass_hash, auth.get("password")):
         token = jwt.encode({"user_name": user.name}, app.config["SECRET_KEY"], "HS256")
@@ -51,7 +51,7 @@ def login():
     return make_response(jsonify({"message": "Invalid username or password."}), 401)
 
 
-@app.route("/register", method=["POST"])
+@app.route("/register", methods=["POST"])
 def register():
     new_user_json = request.get_json()
     if not new_user_json:
@@ -59,7 +59,8 @@ def register():
             jsonify({"message": "user name and password required."}), 400
         )
 
-    if not User.objects(name=new_user_json["username"])[0]:
+    existing_user = User.objects(name=new_user_json["username"])
+    if not existing_user:
         new_user = User(
             name=new_user_json.get("username"),
             pass_hash=generate_password_hash(

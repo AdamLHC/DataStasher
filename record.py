@@ -15,7 +15,7 @@ class RecordApi(MethodView):
         return jsonify(Record.objects)
 
     @auth_required
-    def post(self):
+    def post(self,current_user):
         if not request.is_json:
             abort(415)
 
@@ -27,6 +27,7 @@ class RecordApi(MethodView):
         new_record = Record(
             title=data.get('title'),
             description=data.get('description'),
+            author=current_user["name"],
             upload_date=datetime.now(),
             last_modify=datetime.now())
 
