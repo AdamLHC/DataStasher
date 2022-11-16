@@ -21,5 +21,5 @@ class Record(Document):
 
 
 class User(Document):
-    user_name = StringField(Required=True)
+    name = StringField(Required=True)
     pass_hash = StringField(Required=True)  # Password hash, NOT password itself.

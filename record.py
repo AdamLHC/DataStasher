@@ -1,9 +1,12 @@
-from datetime import datetime
-from flask import jsonify, request, abort, send_file
-from flask.views import MethodView
-from io import BytesIO
 import base64
+from datetime import datetime
+from io import BytesIO
 
+from flask import abort, jsonify, request, send_file, make_response
+from flask.views import MethodView
+from mongoengine import ValidationError
+
+from auth import auth_required
 from data import Record, RecordAttachment
 
 
@@ -11,6 +14,7 @@ class RecordApi(MethodView):
     def get(self):
         return jsonify(Record.objects)
 
+    @auth_required
     def post(self):
         if not request.is_json:
             abort(415)
@@ -32,7 +36,12 @@ class RecordApi(MethodView):
             new_attachment.file.put(BytesIO(file))
             new_record.attachments.append(new_attachment)
 
-        new_record.validate()
-        new_record.save()
+        try:
+            new_record.validate()
+            new_record.save()
+        except ValidationError:
+            return make_response(
+                jsonify({"message": "Invalid post format."}), 400
+            )
 
         return send_file(BytesIO(file), 'application/jpeg')
