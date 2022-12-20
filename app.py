@@ -10,7 +10,7 @@ app.config["MONGODB_SETTINGS"] = [
         "alias": "default",
     }
 ]
-app.config.from_envvar("SECRET_KEY")
+app.config.from_prefixed_env()
 
 from flask_mongoengine import MongoEngine
 

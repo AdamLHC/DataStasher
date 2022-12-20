@@ -45,4 +45,4 @@ class RecordApi(MethodView):
                 jsonify({"message": "Invalid post format."}), 400
             )
 
-        return send_file(BytesIO(file), 'application/jpeg')
+        return jsonify(new_record)
