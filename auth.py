@@ -7,10 +7,13 @@ import jwt
 from app import app
 from data import User
 
+# TODO: This module is temproary, all authentication will be handled through flask-login in future.
 
 def auth_required(f):
     @wraps(f)
     def decorater(*args, **kwargs):
+        # TODO: CHECK AUTH HEADER EXITS
+
         auth_type, access_token = request.headers.get("Authorization").split(" ")
 
         if auth_type != "Bearer" or auth_type is None:
